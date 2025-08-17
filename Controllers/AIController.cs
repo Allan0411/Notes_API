@@ -66,6 +66,19 @@ public class AIController : ControllerBase
         var aiResponse = await _geminiService.GenerateContent(prompt);
         return Ok(new { aiResponse, text = body.Text });
     }
+    [HttpPost("sketch-to-image")]
+    public async Task<IActionResult> SketchToImage([FromBody] SketchToImageRequest body)
+    {
+        if (string.IsNullOrEmpty(body?.Base64Image))
+            return BadRequest(new { message = "Please provide a Base64-encoded image." });
+
+        var prompt = string.IsNullOrEmpty(body.Description)
+            ? "Convert this sketch into a detailed, realistic image."
+            : $"Convert this sketch into a detailed, realistic image based on the following description: {body.Description}";
+
+        var aiResponse = await _geminiService.GenerateContent(prompt, body.Base64Image, body.MimeType ?? "image/png");
+        return Ok(new { aiResponse });
+    }
 }
 
 

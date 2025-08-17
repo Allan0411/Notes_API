@@ -20,6 +20,15 @@ namespace NotesAPI.Models
         [Column("textContents")]
         public string? TextContents { get; set; }
 
+        [Column("drawings")]
+        public string? Drawings { get; set; } // JSON string
+
+        [Column("checklistItems")]
+        public string? ChecklistItems { get; set; } // JSON string
+
+        [Column("formatting")]
+        public string? Formatting { get; set; } // JSON string
+
         [Column("createdAt")]
         [JsonIgnore]
         [BindNever]
@@ -38,8 +47,5 @@ namespace NotesAPI.Models
 
         [Column("creatorUserId")]
         public int CreatorUserId { get; set; }
-
-        // Navigation property if needed (optional for EF relationships)
-        // public virtual User CreatorUser { get; set; }
     }
 }

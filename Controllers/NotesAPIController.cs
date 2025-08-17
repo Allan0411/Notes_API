@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NotesAPI.Data;
 using NotesAPI.Models;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace NotesAPI.Controllers
 {
@@ -64,47 +65,53 @@ namespace NotesAPI.Controllers
 
             return note;
         }
-
-        // 3. Create a new note
+        // Modified CreateNote
         [HttpPost]
-        public async Task<ActionResult<Note>> CreateNote(Note note)
+        public async Task<ActionResult<Note>> CreateNote([FromBody] Note note)
         {
             int userId = GetUserId();
-
             note.CreatorUserId = userId;
             note.CreatedAt = DateTime.UtcNow;
             note.LastAccessed = DateTime.UtcNow;
 
+            // Serialize checklistItems, drawings, and formatting if not already a string
+            if (note.ChecklistItems != null && !IsJsonString(note.ChecklistItems))
+            {
+                note.ChecklistItems = JsonSerializer.Serialize(note.ChecklistItems);
+            }
+            if (note.Drawings != null && !IsJsonString(note.Drawings))
+            {
+                note.Drawings = JsonSerializer.Serialize(note.Drawings);
+            }
+            if (note.Formatting != null && !IsJsonString(note.Formatting))
+            {
+                note.Formatting = JsonSerializer.Serialize(note.Formatting);
+            }
+
             _context.Notes.Add(note);
             await _context.SaveChangesAsync(); // SAVE FIRST! Now note.Id is available
 
-            // Now add creator to the join table as owner
             _context.NotesUser.Add(new NotesUser
             {
                 NoteId = note.Id,      // Real, DB-assigned note id
                 UserId = userId,
                 Role = "owner"
             });
-
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetNote), new { id = note.Id }, note);
         }
 
-
-        // 4. Update a note (if user is owner/editor)
+        // Modified UpdateNote
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNote(int id, [FromBody] Note updatedNote)
         {
             int userId = GetUserId();
-
-            // Only allow if user is collaborator/editor/owner
             var note = await _context.Notes
                 .FirstOrDefaultAsync(n =>
                     n.Id == id &&
                     (_context.NotesUser.Any(nu => nu.NoteId == n.Id && nu.UserId == userId) ||
                     n.CreatorUserId == userId)
                 );
-
             if (note == null) return NotFound();
 
             note.Title = updatedNote.Title;
@@ -112,10 +119,71 @@ namespace NotesAPI.Controllers
             note.LastAccessed = DateTime.UtcNow;
             note.IsArchived = updatedNote.IsArchived;
             note.IsPrivate = updatedNote.IsPrivate;
-            await _context.SaveChangesAsync();
 
+            // Serialize checklistItems, drawings, and formatting if not already a string
+            if (updatedNote.ChecklistItems != null && !IsJsonString(updatedNote.ChecklistItems))
+            {
+                note.ChecklistItems = JsonSerializer.Serialize(updatedNote.ChecklistItems);
+            }
+            else
+            {
+                note.ChecklistItems = updatedNote.ChecklistItems;
+            }
+            if (updatedNote.Drawings != null && !IsJsonString(updatedNote.Drawings))
+            {
+                note.Drawings = JsonSerializer.Serialize(updatedNote.Drawings);
+            }
+            else
+            {
+                note.Drawings = updatedNote.Drawings;
+            }
+            if (updatedNote.Formatting != null && !IsJsonString(updatedNote.Formatting))
+            {
+                note.Formatting = JsonSerializer.Serialize(updatedNote.Formatting);
+            }
+            else
+            {
+                note.Formatting = updatedNote.Formatting;
+            }
+
+            await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        // Helper function
+        private bool IsJsonString(string value)
+        {
+            value = value?.Trim();
+            if (string.IsNullOrEmpty(value)) return false;
+            return (value.StartsWith("{") && value.EndsWith("}")) ||
+                   (value.StartsWith("[") && value.EndsWith("]"));
+        }
+
+        //random
+        // PATCH api/notes/123/archive
+        [HttpPatch("{id}/archive")]
+        public async Task<IActionResult> UpdateIsArchived(int id, [FromBody] bool isArchived)
+        {
+            // Update the field only, e.g. via EF Core's .Property("IsArchived").IsModified = true;
+            var note = await _context.Notes.FindAsync(id);
+            if (note == null) return NotFound();
+            note.IsArchived = isArchived;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // PATCH api/notes/123/private
+        [HttpPatch("{id}/private")]
+        public async Task<IActionResult> UpdateIsPrivate(int id, [FromBody] bool isPrivate)
+        {
+            var note = await _context.Notes.FindAsync(id);
+            if (note == null) return NotFound();
+            note.IsPrivate = isPrivate;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+
 
         // 5. Delete a note (only creator allowed)
         [HttpDelete("{id}")]
@@ -189,35 +257,7 @@ namespace NotesAPI.Controllers
             return Ok();
         }
 
-        // 8. Archive a note
-        [HttpPut("{id}/archive")]
-        public async Task<IActionResult> ArchiveNote(int id)
-        {
-            int userId = GetUserId();
-            var note = await _context.Notes
-                .FirstOrDefaultAsync(n => n.Id == id && n.CreatorUserId == userId);
-
-            if (note == null) return NotFound();
-
-            note.IsArchived = true;
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-
-        // 9. Unarchive a note
-        [HttpPut("{id}/unarchive")]
-        public async Task<IActionResult> UnarchiveNote(int id)
-        {
-            int userId = GetUserId();
-            var note = await _context.Notes
-                .FirstOrDefaultAsync(n => n.Id == id && n.CreatorUserId == userId);
-
-            if (note == null) return NotFound();
-
-            note.IsArchived = false;
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
+        
 
         // 10. Export a note (example stub)
         [HttpGet("{id}/export")]

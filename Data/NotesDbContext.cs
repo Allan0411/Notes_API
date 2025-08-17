@@ -2,13 +2,11 @@
 using NotesAPI.Models;
 using System;
 
-
 namespace NotesAPI.Data
 {
     public partial class NotesDbContext : DbContext
     {
         public NotesDbContext() { }
-
         public NotesDbContext(DbContextOptions<NotesDbContext> options)
             : base(options) { }
 
@@ -22,7 +20,7 @@ namespace NotesAPI.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Suggested: use appsettings.json, not hardcoded string.
+                // Use configuration file or environment for connection string.
                 // optionsBuilder.UseMySql(
                 //     configuration.GetConnectionString("DefaultConnection"),
                 //     ServerVersion.AutoDetect(configuration.GetConnectionString("DefaultConnection"))
@@ -38,7 +36,6 @@ namespace NotesAPI.Data
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("users");
-
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id")
                     .HasColumnType("int(11)");
@@ -55,7 +52,6 @@ namespace NotesAPI.Data
             modelBuilder.Entity<Note>(entity =>
             {
                 entity.ToTable("notes");
-
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id")
                     .HasColumnType("int(11)");
@@ -63,6 +59,12 @@ namespace NotesAPI.Data
                     .HasMaxLength(255);
                 entity.Property(e => e.TextContents).HasColumnName("textContents")
                     .HasColumnType("text");
+
+                // JSON columns (critical for dynamic JSON support)
+                entity.Property(e => e.Drawings).HasColumnName("drawings").HasColumnType("json");
+                entity.Property(e => e.ChecklistItems).HasColumnName("checklistItems").HasColumnType("json");
+                entity.Property(e => e.Formatting).HasColumnName("formatting").HasColumnType("json");
+
                 entity.Property(e => e.CreatedAt).HasColumnName("createdAt")
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("current_timestamp()");
@@ -130,7 +132,6 @@ namespace NotesAPI.Data
 
             OnModelCreatingPartial(modelBuilder);
         }
-
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
