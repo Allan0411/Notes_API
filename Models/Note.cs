@@ -30,12 +30,10 @@ namespace NotesAPI.Models
         public string? Formatting { get; set; } // JSON string
 
         [Column("createdAt")]
-        [JsonIgnore]
         [BindNever]
         public DateTime? CreatedAt { get; set; }
 
         [Column("lastAccessed")]
-        [JsonIgnore]
         [BindNever]
         public DateTime? LastAccessed { get; set; }
 
