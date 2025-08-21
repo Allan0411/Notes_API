@@ -34,15 +34,47 @@ public class CollaborationInvitesController : ControllerBase
         if (note == null)
             return Forbid("You do not have permission to invite collaborators for this note.");
 
+        // Check if an invite already exists for this user and note
+        var existingInvite = await _context.CollaborationInvites
+            .FirstOrDefaultAsync(ci => ci.NoteId == invite.NoteId && ci.InvitedUserId == invite.InvitedUserId);
+
+        if (existingInvite != null)
+        {
+            if (existingInvite.Status == "Pending")
+            {
+                return BadRequest("An invite is already pending for this user.");
+            }
+            else if (existingInvite.Status == "Accepted")
+            {
+                return BadRequest("This user has already accepted the collaboration invite.");
+            }
+            else if (existingInvite.Status == "Declined")
+            {
+                // Allow resending if previously declined
+                // Update the existing invite instead of creating a new one
+                existingInvite.InviterUserId = userId;
+                existingInvite.Status = "Pending";
+                existingInvite.SentAt = GetIndianStandardTime();
+                existingInvite.RespondedAt = null; // Clear previous response timestamp
+                existingInvite.Role = invite.Role; // Update role if needed
+
+                await _context.SaveChangesAsync();
+                return Ok(existingInvite);
+            }
+        }
+
+        // Create new invite if none exists
         invite.InviterUserId = userId;
         invite.Status = "Pending";
         invite.SentAt = GetIndianStandardTime();
+        invite.RespondedAt = null; // Ensure it's null for new invites
 
         _context.CollaborationInvites.Add(invite);
         await _context.SaveChangesAsync();
 
         return Ok(invite);
     }
+
 
     [HttpGet("pending")]
     public async Task<IActionResult> GetPendingInvites()
