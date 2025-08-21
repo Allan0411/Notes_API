@@ -25,6 +25,12 @@ namespace NotesAPI.Controllers
         {
             _context = context;
         }
+        public static DateTime GetIndianStandardTime()
+        {
+            // IST is UTC + 5 hours 30 minutes
+            return DateTime.UtcNow.AddHours(5).AddMinutes(30);
+        }
+
 
         // 1. List all notes user can access (owned/shared, not archived)
         [HttpGet]
@@ -52,9 +58,8 @@ namespace NotesAPI.Controllers
 
             var note = await _context.Notes
                 .FirstOrDefaultAsync(n =>
-                    n.Id == id &&
-                    (_context.NotesUser.Any(nu => nu.NoteId == n.Id && nu.UserId == userId) ||
-                     n.CreatorUserId == userId)
+                    n.Id == id 
+                   
                 );
 
             if (note == null)
@@ -65,14 +70,15 @@ namespace NotesAPI.Controllers
 
             return note;
         }
+
         // Modified CreateNote
         [HttpPost]
         public async Task<ActionResult<Note>> CreateNote([FromBody] Note note)
         {
             int userId = GetUserId();
             note.CreatorUserId = userId;
-            note.CreatedAt = DateTime.UtcNow;
-            note.LastAccessed = DateTime.UtcNow;
+            note.CreatedAt = GetIndianStandardTime();
+            note.LastAccessed =GetIndianStandardTime();
 
             // Serialize checklistItems, drawings, and formatting if not already a string
             if (note.ChecklistItems != null && !IsJsonString(note.ChecklistItems))
@@ -116,7 +122,7 @@ namespace NotesAPI.Controllers
 
             note.Title = updatedNote.Title;
             note.TextContents = updatedNote.TextContents;
-            note.LastAccessed = DateTime.UtcNow;
+            note.LastAccessed = GetIndianStandardTime();
             note.IsArchived = updatedNote.IsArchived;
             note.IsPrivate = updatedNote.IsPrivate;
 
@@ -201,63 +207,6 @@ namespace NotesAPI.Controllers
             return NoContent();
         }
 
-        // 6. Add collaborator
-        [HttpPost("{noteId}/collaborators")]
-        public async Task<IActionResult> AddCollaborator(int noteId, [FromBody] AddCollaboratorRequest request)
-        {
-            int userId = GetUserId();
-
-            var note = await _context.Notes
-                .FirstOrDefaultAsync(n => n.Id == noteId && n.CreatorUserId == userId);
-
-            if (note == null) return NotFound("Note not found or not owner");
-
-            // Prevent adding self as collaborator
-            if (request.UserId == userId)
-                return BadRequest("Cannot add yourself as collaborator.");
-
-            // Optionally check for existing collaboration
-            var existing = await _context.NotesUser
-                .FirstOrDefaultAsync(nu => nu.NoteId == noteId && nu.UserId == request.UserId);
-
-            if (existing != null)
-                return BadRequest("User is already a collaborator.");
-
-            // Add to join table
-            _context.NotesUser.Add(new NotesUser
-            {
-                NoteId = noteId,
-                UserId = request.UserId,
-                Role = request.Role ?? "editor"
-            });
-
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-
-
-        // 7. Remove collaborator
-        [HttpDelete("{noteId}/collaborators/{collaboratorUserId}")]
-        public async Task<IActionResult> RemoveCollaborator(int noteId, int collaboratorUserId)
-        {
-            int userId = GetUserId();
-
-            var note = await _context.Notes
-                .FirstOrDefaultAsync(n => n.Id == noteId && n.CreatorUserId == userId);
-
-            if (note == null) return NotFound("Note not found or not owner");
-
-            var collab = await _context.NotesUser
-                .FirstOrDefaultAsync(nu => nu.NoteId == noteId && nu.UserId == collaboratorUserId);
-
-            if (collab == null) return NotFound("Collaborator not found.");
-
-            _context.NotesUser.Remove(collab);
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-
-        
 
         // 10. Export a note (example stub)
         [HttpGet("{id}/export")]
@@ -276,5 +225,7 @@ namespace NotesAPI.Controllers
             var exportContent = $"Title: {note.Title}\n\nContent:\n{note.TextContents}";
             return File(System.Text.Encoding.UTF8.GetBytes(exportContent), "text/plain", $"note-{id}.txt");
         }
+        
+
     }
 }

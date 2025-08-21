@@ -42,6 +42,53 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "CollaborationInvitesController",
+    "Method": "SendInvite",
+    "RelativePath": "api/CollaborationInvites",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "invite",
+        "Type": "NotesAPI.Models.CollaborationInvite",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CollaborationInvitesController",
+    "Method": "RespondToInvite",
+    "RelativePath": "api/CollaborationInvites/{inviteId}/respond",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inviteId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "accept",
+        "Type": "System.Boolean",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CollaborationInvitesController",
+    "Method": "GetPendingInvites",
+    "RelativePath": "api/CollaborationInvites/pending",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "AIController",
     "Method": "ExpandText",
     "RelativePath": "api/expand",
@@ -221,22 +268,6 @@
   },
   {
     "ContainingType": "NotesAPI.Controllers.NotesController",
-    "Method": "ArchiveNote",
-    "RelativePath": "api/Notes/{id}/archive",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "NotesAPI.Controllers.NotesController",
     "Method": "ExportNote",
     "RelativePath": "api/Notes/{id}/export",
     "HttpMethod": "GET",
@@ -267,22 +298,6 @@
       {
         "Name": "isPrivate",
         "Type": "System.Boolean",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "NotesAPI.Controllers.NotesController",
-    "Method": "UnarchiveNote",
-    "RelativePath": "api/Notes/{id}/unarchive",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -347,9 +362,25 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "NotesAPI.Controllers.NotesController",
+    "ContainingType": "NotesAPI.Controllers.NotesUserController",
+    "Method": "GetCollaborators",
+    "RelativePath": "api/NotesUser/{noteId}/collaborators",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "noteId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotesAPI.Controllers.NotesUserController",
     "Method": "AddCollaborator",
-    "RelativePath": "api/Notes/{noteId}/collaborators",
+    "RelativePath": "api/NotesUser/{noteId}/collaborators",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -361,16 +392,16 @@
       },
       {
         "Name": "request",
-        "Type": "NotesAPI.Models.AddCollaboratorRequest",
+        "Type": "NotesAPI.Controllers.AddCollaboratorRequest",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "NotesAPI.Controllers.NotesController",
+    "ContainingType": "NotesAPI.Controllers.NotesUserController",
     "Method": "RemoveCollaborator",
-    "RelativePath": "api/Notes/{noteId}/collaborators/{collaboratorUserId}",
+    "RelativePath": "api/NotesUser/{noteId}/collaborators/{collaboratorUserId}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -390,71 +421,13 @@
   },
   {
     "ContainingType": "NotesAPI.Controllers.NotesUserController",
-    "Method": "AddCollaborator",
-    "RelativePath": "api/NotesUser",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "notesUser",
-        "Type": "NotesAPI.Models.NotesUser",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "NotesAPI.Models.NotesUser",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "NotesAPI.Controllers.NotesUserController",
-    "Method": "RemoveCollaborator",
-    "RelativePath": "api/NotesUser/{id}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "NotesAPI.Controllers.NotesUserController",
-    "Method": "GetCollaborators",
-    "RelativePath": "api/NotesUser/note/{noteId}",
+    "Method": "GetCollaboratedNoteIds",
+    "RelativePath": "api/NotesUser/collaborations",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [
-      {
-        "Name": "noteId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[NotesAPI.Models.NotesUser, NotesAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "Parameters": [],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "AIController",
@@ -499,6 +472,48 @@
       {
         "Name": "body",
         "Type": "SummarizeRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotesAPI.Controllers.UsersController",
+    "Method": "GetUserById",
+    "RelativePath": "api/Users/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "NotesAPI.Models.User",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "NotesAPI.Controllers.UsersController",
+    "Method": "GetUserByEmail",
+    "RelativePath": "api/Users/byEmail/{email}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
         "IsRequired": true
       }
     ],

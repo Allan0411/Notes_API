@@ -15,6 +15,7 @@ namespace NotesAPI.Data
         public virtual DbSet<NotesUser> NotesUser { get; set; } = null!;
         public virtual DbSet<Attachment> Attachments { get; set; } = null!;
         public virtual DbSet<AIAction> AIActions { get; set; } = null!;
+        public virtual  DbSet<CollaborationInvite> CollaborationInvites { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -129,6 +130,50 @@ namespace NotesAPI.Data
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("current_timestamp()");
             });
+
+            modelBuilder.Entity<CollaborationInvite>(entity =>
+            {
+                entity.ToTable("CollaborationInvites");
+
+                entity.HasKey(e => e.InviteId);
+
+                entity.Property(e => e.InviteId).HasColumnName("InviteId").HasColumnType("int").ValueGeneratedOnAdd();
+
+                entity.Property(e => e.NoteId).HasColumnName("NoteId").IsRequired();
+
+                entity.Property(e => e.InvitedUserId).HasColumnName("InvitedUserId").IsRequired();
+
+                entity.Property(e => e.InviterUserId).HasColumnName("InviterUserId").IsRequired();
+
+                entity.Property(e => e.Role)
+                      .HasColumnName("Role")
+                      .HasMaxLength(50)
+                      .IsRequired()
+                      .HasDefaultValue("editor");
+
+                entity.Property(e => e.Status)
+                      .HasColumnName("Status")
+                      .HasMaxLength(20)
+                      .IsRequired()
+                      .HasDefaultValue("Pending");
+
+                entity.Property(e => e.SentAt)
+                      .HasColumnName("SentAt")
+                      .HasColumnType("timestamp")
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                      .IsRequired();
+
+                entity.Property(e => e.RespondedAt)
+                      .HasColumnName("RespondedAt")
+                      .HasColumnType("timestamp")
+                      .IsRequired(false);
+
+                // Add foreign keys if you want here, EF Core can infer based on navigation too
+                // entity.HasOne<Note>().WithMany().HasForeignKey(e => e.NoteId);
+                // entity.HasOne<User>().WithMany().HasForeignKey(e => e.InvitedUserId);
+                // entity.HasOne<User>().WithMany().HasForeignKey(e => e.InviterUserId);
+            });
+
 
             OnModelCreatingPartial(modelBuilder);
         }
