@@ -42,6 +42,38 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "NotesAPI.Controllers.AuthController",
+    "Method": "RequestReset",
+    "RelativePath": "api/Auth/request-reset",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "NotesAPI.Controllers.ResetRequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotesAPI.Controllers.AuthController",
+    "Method": "VerifyReset",
+    "RelativePath": "api/Auth/verify-reset",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "NotesAPI.Controllers.ResetPasswordDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "CollaborationInvitesController",
     "Method": "SendInvite",
     "RelativePath": "api/CollaborationInvites",
@@ -115,6 +147,22 @@
       {
         "Name": "body",
         "Type": "SummarizeRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AIController",
+    "Method": "ImageToText",
+    "RelativePath": "api/image-to-text",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "body",
+        "Type": "AIController\u002BImageToTextRequest",
         "IsRequired": true
       }
     ],
@@ -421,6 +469,32 @@
   },
   {
     "ContainingType": "NotesAPI.Controllers.NotesUserController",
+    "Method": "UpdateCollaboratorRole",
+    "RelativePath": "api/NotesUser/{noteId}/collaborators/{collaboratorUserId}/role",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "noteId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "collaboratorUserId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "NotesAPI.Controllers.UpdateRoleRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotesAPI.Controllers.NotesUserController",
     "Method": "GetCollaboratedNoteIds",
     "RelativePath": "api/NotesUser/collaborations",
     "HttpMethod": "GET",
@@ -447,15 +521,15 @@
   },
   {
     "ContainingType": "AIController",
-    "Method": "SketchToImage",
-    "RelativePath": "api/sketch-to-image",
+    "Method": "SketchToRefinedImage",
+    "RelativePath": "api/sketch-to-refined-image",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "body",
-        "Type": "SketchToImageRequest",
+        "Type": "AIController\u002BSketchToRefinedRequest",
         "IsRequired": true
       }
     ],

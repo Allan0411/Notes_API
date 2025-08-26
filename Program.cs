@@ -14,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddScoped<GeminiService>();
+builder.Services.AddSingleton<EmailService>();
+
 
 // 🔌 MySQL DB Connection
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

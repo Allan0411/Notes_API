@@ -160,7 +160,7 @@
         }
       }
     },
-    "/api/sketch-to-image": {
+    "/api/sketch-to-refined-image": {
       "post": {
         "tags": [
           "AI"
@@ -169,17 +169,48 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SketchToImageRequest"
+                "$ref": "#/components/schemas/SketchToRefinedRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/SketchToImageRequest"
+                "$ref": "#/components/schemas/SketchToRefinedRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/SketchToImageRequest"
+                "$ref": "#/components/schemas/SketchToRefinedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/image-to-text": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageToTextRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageToTextRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageToTextRequest"
               }
             }
           }
@@ -353,6 +384,68 @@
         "tags": [
           "Auth"
         ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Auth/request-reset": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Auth/verify-reset": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDTO"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success"
@@ -832,6 +925,57 @@
         }
       }
     },
+    "/api/NotesUser/{noteId}/collaborators/{collaboratorUserId}/role": {
+      "put": {
+        "tags": [
+          "NotesUser"
+        ],
+        "parameters": [
+          {
+            "name": "noteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "collaboratorUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/NotesUser/collaborations": {
       "get": {
         "tags": [
@@ -986,6 +1130,20 @@
         },
         "additionalProperties": false
       },
+      "ImageToTextRequest": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "customPrompt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "LoginDTO": {
         "type": "object",
         "properties": {
@@ -1051,18 +1209,38 @@
         },
         "additionalProperties": false
       },
-      "SketchToImageRequest": {
+      "ResetPasswordDTO": {
         "type": "object",
         "properties": {
-          "description": {
+          "code": {
             "type": "string",
             "nullable": true
           },
-          "base64Image": {
+          "newPassword": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResetRequestDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SketchToRefinedRequest": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
             "type": "string",
             "nullable": true
           },
-          "mimeType": {
+          "refinementInstructions": {
             "type": "string",
             "nullable": true
           }
@@ -1073,6 +1251,16 @@
         "type": "object",
         "properties": {
           "text": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateRoleRequest": {
+        "type": "object",
+        "properties": {
+          "role": {
             "type": "string",
             "nullable": true
           }
@@ -1102,6 +1290,15 @@
           "passwordHash": {
             "minLength": 1,
             "type": "string"
+          },
+          "resetToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "tokenExpiry": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false

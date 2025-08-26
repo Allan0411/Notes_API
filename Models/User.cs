@@ -21,5 +21,12 @@ namespace NotesAPI.Models
         [Required]
         [Column("password_hash")]
         public string PasswordHash { get; set; } = string.Empty;
+
+        // Add these two fields for password reset
+        [Column("reset_token")]
+        public string? ResetToken { get; set; }
+
+        [Column("token_expiry")]
+        public DateTime? TokenExpiry { get; set; }
     }
 }
