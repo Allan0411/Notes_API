@@ -45,5 +45,8 @@ namespace NotesAPI.Models
 
         [Column("creatorUserId")]
         public int CreatorUserId { get; set; }
+
+        [Column("version")]
+        public int Version { get; set; } // For concurrency control
     }
 }

@@ -1049,6 +1049,37 @@
           }
         }
       }
+    },
+    "/api/Users/changeName": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeNameRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeNameRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeNameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1075,6 +1106,16 @@
             "format": "int32"
           },
           "role": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangeNameRequest": {
+        "type": "object",
+        "properties": {
+          "newUsername": {
             "type": "string",
             "nullable": true
           }
@@ -1203,6 +1244,10 @@
             "type": "boolean"
           },
           "creatorUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
             "type": "integer",
             "format": "int32"
           }

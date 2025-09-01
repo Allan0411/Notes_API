@@ -63,5 +63,34 @@ namespace NotesAPI.Controllers
             return Ok(user);
         }
 
+
+        [HttpPatch("changeName")]
+        public async Task<ActionResult> ChangeName([FromBody] ChangeNameRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.NewUsername))
+                return BadRequest("New username is required");
+
+            // Get the logged-in user's ID from JWT claims
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return NotFound("User not found");
+
+            user.Username = request.NewUsername;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Username updated successfully", user.Username });
+        }
+
+        // DTO for request
+        public class ChangeNameRequest
+        {
+            public string NewUsername { get; set; } = string.Empty;
+        }
+
+
     }
 }

@@ -592,5 +592,21 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotesAPI.Controllers.UsersController",
+    "Method": "ChangeName",
+    "RelativePath": "api/Users/changeName",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "NotesAPI.Controllers.UsersController\u002BChangeNameRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]
