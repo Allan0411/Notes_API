@@ -48,5 +48,9 @@ namespace NotesAPI.Models
 
         [Column("version")]
         public int Version { get; set; } // For concurrency control
+
+        
+        [Column("last_changed_by")]
+        public string LastChangedBy { get; set; }
     }
 }

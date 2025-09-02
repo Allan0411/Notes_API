@@ -79,6 +79,7 @@ namespace NotesAPI.Controllers
             note.CreatorUserId = userId;
             note.CreatedAt = GetIndianStandardTime();
             note.LastAccessed =GetIndianStandardTime();
+            note.LastChangedBy = userId.ToString();
 
             // Serialize checklistItems, drawings, and formatting if not already a string
             if (note.ChecklistItems != null && !IsJsonString(note.ChecklistItems))
@@ -108,53 +109,89 @@ namespace NotesAPI.Controllers
         }
 
         // Modified UpdateNote
+        // Modified UpdateNote with Concurrency Control
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNote(int id, [FromBody] Note updatedNote)
         {
             int userId = GetUserId();
-            var note = await _context.Notes
-                .FirstOrDefaultAsync(n =>
-                    n.Id == id &&
-                    (_context.NotesUser.Any(nu => nu.NoteId == n.Id && nu.UserId == userId) ||
-                    n.CreatorUserId == userId)
-                );
-            if (note == null) return NotFound();
 
-            note.Title = updatedNote.Title;
-            note.TextContents = updatedNote.TextContents;
-            note.LastAccessed = GetIndianStandardTime();
-            note.IsArchived = updatedNote.IsArchived;
-            note.IsPrivate = updatedNote.IsPrivate;
+            try
+            {
+                var note = await _context.Notes
+                    .FirstOrDefaultAsync(n =>
+                        n.Id == id &&
+                        (_context.NotesUser.Any(nu => nu.NoteId == n.Id && nu.UserId == userId) ||
+                        n.CreatorUserId == userId)
+                    );
 
-            // Serialize checklistItems, drawings, and formatting if not already a string
-            if (updatedNote.ChecklistItems != null && !IsJsonString(updatedNote.ChecklistItems))
-            {
-                note.ChecklistItems = JsonSerializer.Serialize(updatedNote.ChecklistItems);
-            }
-            else
-            {
-                note.ChecklistItems = updatedNote.ChecklistItems;
-            }
-            if (updatedNote.Drawings != null && !IsJsonString(updatedNote.Drawings))
-            {
-                note.Drawings = JsonSerializer.Serialize(updatedNote.Drawings);
-            }
-            else
-            {
-                note.Drawings = updatedNote.Drawings;
-            }
-            if (updatedNote.Formatting != null && !IsJsonString(updatedNote.Formatting))
-            {
-                note.Formatting = JsonSerializer.Serialize(updatedNote.Formatting);
-            }
-            else
-            {
-                note.Formatting = updatedNote.Formatting;
-            }
+                if (note == null) return NotFound();
 
-            await _context.SaveChangesAsync();
-            return NoContent();
+                // **CONCURRENCY CHECK** - This is the key addition!
+                if (note.Version != updatedNote.Version)
+                {
+                    return Conflict(new
+                    {
+                        Error = "conflict",
+                        Message = $"Note was updated by user {note.LastChangedBy}",
+                        CurrentVersion = note.Version,
+                        LastChangedBy = note.LastChangedBy
+                    });
+                }
+
+                // Update the note
+                note.Title = updatedNote.Title;
+                note.TextContents = updatedNote.TextContents;
+                note.LastAccessed = GetIndianStandardTime();
+                note.IsArchived = updatedNote.IsArchived;
+                note.IsPrivate = updatedNote.IsPrivate;
+                note.LastChangedBy = userId.ToString(); // Track who made the change
+                note.Version++; // Increment version (1→2→3→4...)
+
+                // Serialize checklistItems, drawings, and formatting if not already a string
+                if (updatedNote.ChecklistItems != null && !IsJsonString(updatedNote.ChecklistItems))
+                {
+                    note.ChecklistItems = JsonSerializer.Serialize(updatedNote.ChecklistItems);
+                }
+                else
+                {
+                    note.ChecklistItems = updatedNote.ChecklistItems;
+                }
+
+                if (updatedNote.Drawings != null && !IsJsonString(updatedNote.Drawings))
+                {
+                    note.Drawings = JsonSerializer.Serialize(updatedNote.Drawings);
+                }
+                else
+                {
+                    note.Drawings = updatedNote.Drawings;
+                }
+
+                if (updatedNote.Formatting != null && !IsJsonString(updatedNote.Formatting))
+                {
+                    note.Formatting = JsonSerializer.Serialize(updatedNote.Formatting);
+                }
+                else
+                {
+                    note.Formatting = updatedNote.Formatting;
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Return success with new version info
+                return Ok(new
+                {
+                    Success = true,
+                    NewVersion = note.Version,
+                    LastChangedBy = note.LastChangedBy,
+                    Message = "Note updated successfully"
+                });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict(new { Error = "Concurrency conflict occurred during save" });
+            }
         }
+
 
         // Helper function
         private bool IsJsonString(string value)

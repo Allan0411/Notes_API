@@ -85,6 +85,7 @@ namespace NotesAPI.Controllers
             return Ok(new { message = "Username updated successfully", user.Username });
         }
 
+     
         // DTO for request
         public class ChangeNameRequest
         {
