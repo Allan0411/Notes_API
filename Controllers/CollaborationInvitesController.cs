@@ -88,6 +88,18 @@ public class CollaborationInvitesController : ControllerBase
         return Ok(invites);
     }
 
+    [HttpGet("sentInvites")]
+    public async Task<IActionResult> getSentInvites()
+    {
+        int userId = GetUserId();
+
+        var invites = await _context.CollaborationInvites
+            .Where(ci => ci.InviterUserId == userId && ci.Status == "Pending")
+            .ToListAsync();
+
+        return Ok(invites);
+    }
+
     [HttpPost("{inviteId}/respond")]
     public async Task<IActionResult> RespondToInvite(int inviteId, [FromBody] bool accept)
     {
