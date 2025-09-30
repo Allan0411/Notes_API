@@ -496,6 +496,18 @@
         }
       }
     },
+    "/api/CollaborationInvites/sentInvites": {
+      "get": {
+        "tags": [
+          "CollaborationInvites"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/CollaborationInvites/{inviteId}/respond": {
       "post": {
         "tags": [

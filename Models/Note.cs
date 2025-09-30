@@ -52,5 +52,6 @@ namespace NotesAPI.Models
         
         [Column("last_changed_by")]
         public string LastChangedBy { get; set; }
+
     }
 }
